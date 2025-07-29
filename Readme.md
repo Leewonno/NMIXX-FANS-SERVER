@@ -2,8 +2,6 @@
 
 케이팝(K-POP) 팬들을 위한 커뮤니티 플랫폼 개발 프로젝트입니다.
 
----
-
 ## 📌 기술 스택
 
 - **Backend**: Django 5.2.4, Graphene-Django
