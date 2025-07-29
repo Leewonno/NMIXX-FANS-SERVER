@@ -11,8 +11,6 @@
 - **Database**: PostgreSQL
 - **Language**: Python 3.10
 
----
-
 ## ✨ 주요 기능 (계획 포함)
 
 - 회원 가입 및 로그인 (JWT 인증)
