@@ -1,12 +1,13 @@
 import graphene
-from member.schema import Query as CoreQuery
+
+from member.schema import MemberQuery, MemberMutation
 
 
-class Query(CoreQuery, graphene.ObjectType):
+class Query(MemberQuery, graphene.ObjectType):
     pass
 
 
-class Mutation(graphene.ObjectType):
+class Mutation(MemberMutation, graphene.ObjectType):
     pass
 
 

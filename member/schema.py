@@ -1,31 +1,12 @@
 import graphene
 from django.contrib.auth.models import User
-from graphene_django import DjangoObjectType
+from django.db import transaction
 
 from member.models import Member
+from member.services.type import MemberType, UserType
 
 
-class MemberType(DjangoObjectType):
-    class Meta:
-        model = Member
-        fields = ('id', 'name', 'gender')  # 명시적 필드
-
-
-class UserType(DjangoObjectType):
-    member = graphene.Field(MemberType)
-
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email')
-
-    def resolve_member(self, info):
-        # user 인스턴스(self)에 연결된 Member를 반환
-        # return Member.objects.filter(user_id=self.id).first()
-        return self.member
-        # 또는 self.member (OneToOneField면) 사용 가능
-
-
-class Query(graphene.ObjectType):
+class MemberQuery(graphene.ObjectType):
     # 전체 회원 불러오기
     all_members = graphene.List(MemberType)
 
@@ -42,22 +23,39 @@ class Query(graphene.ObjectType):
         return User.objects.filter(username=username).first()
 
 
-class CreateMember(graphene.Mutation):
-    # Mutation 결과로 반환할 필드들
+class CreateUser(graphene.Mutation):
+    # 반환할 필드
+    user = graphene.Field(lambda: UserType)
     member = graphene.Field(MemberType)
     ok = graphene.Boolean()
 
     class Arguments:
         # 클라이언트가 넘겨줄 인자
+        username = graphene.String(required=True)
+        password = graphene.String(required=True)
+        email = graphene.String(required=True)
         name = graphene.String(required=True)
         gender = graphene.String(required=True)
-        user_id = graphene.Int(required=True)  # 외래키인 User ID
 
-    def mutate(self, info, name, gender, user_id):
-        member = Member(name=name, gender=gender, user_id=user_id)
-        member.save()
-        return CreateMember(member=member, ok=True)
+    @staticmethod
+    def mutate(self, info, username, password, name, gender, email):
+        with transaction.atomic():
+            # 1. User 생성
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=email
+            )
+
+            # 2. Member 생성 (User와 연결)
+            member = Member.objects.create(
+                user=user,
+                name=name,
+                gender=gender
+            )
+
+        return CreateUser(user=user, member=member, ok=True)
 
 
-class Mutation(graphene.ObjectType):
-    create_member = CreateMember.Field()
+class MemberMutation(graphene.ObjectType):
+    create_user = CreateUser.Field()
