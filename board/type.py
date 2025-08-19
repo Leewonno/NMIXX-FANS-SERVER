@@ -7,6 +7,8 @@ from member.type import MemberType
 
 
 class BoardCommentType(DjangoObjectType):
+    member = graphene.Field(MemberType)
+
     class Meta:
         model = BoardComment
         fields = [
@@ -14,10 +16,14 @@ class BoardCommentType(DjangoObjectType):
             'comment',
         ]
 
+    def resolve_member(self, info):
+        return self.member
+
 
 class BoardType(DjangoObjectType):
     member = graphene.Field(MemberType)
     board_comment = graphene.Field(BoardCommentType)
+    board_comments = graphene.List(BoardCommentType)
 
     class Meta:
         model = Board
@@ -28,13 +34,20 @@ class BoardType(DjangoObjectType):
             'content',
             'created_at',
             'img_01',
+            'img_02',
+            'img_03',
+            'img_04',
+            'img_05',
         )
 
     def resolve_member(self, info):
         return self.member
 
     def resolve_board_comment(self, info):
-        return BoardComment.objects.filter(member=self.member).last()
+        return BoardComment.objects.filter(board=self).last()
+
+    def resolve_board_comments(self, info):
+        return BoardComment.objects.filter(board=self)
 
 
 class UserType(DjangoObjectType):

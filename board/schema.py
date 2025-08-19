@@ -1,4 +1,5 @@
 import graphene
+from django.db.models import Q
 
 from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE
 from board.models import Board, BoardComment
@@ -85,6 +86,7 @@ class BoardMutation(graphene.ObjectType):
 
 
 class BoardQuery(graphene.ObjectType):
+    # 특정 게시판(커뮤니티)에 게시글 불러오기
     boards = graphene.List(
         BoardType,
         community=graphene.String(required=True),
@@ -92,8 +94,20 @@ class BoardQuery(graphene.ObjectType):
         page_size=graphene.Int(default_value=10)
     )
 
+    # 특정 게시글 불러오기 (댓글과 함께)
+    board = graphene.Field(
+        BoardType,
+        board_id=graphene.Int(required=True),
+    )
+
     @classmethod
     def resolve_boards(cls, root, info, community, page, page_size):
         offset = (page - 1) * page_size
-        return Board.objects.filter(community=community).order_by("-id")[offset:offset + page_size]
+        return Board.objects.filter(~Q(block=True), community=community ).order_by("-id")[offset:offset + page_size]
 
+    @classmethod
+    def resolve_board(cls, root, info, board_id):
+        try:
+            return Board.objects.get(block=False, id=board_id)
+        except Board.DoesNotExist:
+            return None
