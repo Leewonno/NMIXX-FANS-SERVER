@@ -164,6 +164,17 @@ GRAPHQL_JWT = {
     "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),  # Refresh Token 7일
 }
 
+# 인증 이메일 설정
+# 임시테스트용
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"     # SMTP 서버
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False   # TLS일 땐 SSL 사용하지 않음
+# EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+
 INSTALLED_APPS += ['corsheaders']
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
 CORS_ALLOW_ALL_ORIGINS = True

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Member(models.Model):
@@ -33,3 +34,18 @@ class Member(models.Model):
         null=True,
         blank=True
     )
+
+
+# 이메일 인증
+class Email(models.Model):
+    # '이메일'
+    email = models.EmailField(null=False, unique=True)
+
+    # '인증코드'
+    code = models.CharField(max_length=6)
+
+    # '만료시간'
+    expire_at = models.DateTimeField()
+
+    def is_valid(self):
+        return timezone.now() < self.expire_at
