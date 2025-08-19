@@ -2,10 +2,9 @@ import graphene
 
 from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE
 from board.models import Board, BoardComment
+from board.services.type import BoardType
 from member.share import get_member_from_token
 
-
-# 게시물 불러오기
 
 # 게시글 작성
 class CreateBoard(graphene.Mutation):
@@ -54,17 +53,17 @@ class CreateComment(graphene.Mutation):
 
     class Arguments:
         token = graphene.String(required=True)
-        boardId = graphene.Int(required=True)
+        board_id = graphene.Int(required=True)
         comment = graphene.String(required=True)
 
     @classmethod
-    def mutate(cls, root, info, token, boardId, comment):
+    def mutate(cls, root, info, token, board_id, comment):
         member = get_member_from_token(token, info.context)
 
         if not member:
             return CreateComment(ok=False, error=TOKEN_ERROR_MESSAGE)
 
-        board = Board.objects.filter(id=boardId)
+        board = Board.objects.get(id=board_id)
 
         if not board:
             return CreateComment(ok=False, error=BOARD_ERROR_MESSAGE)
@@ -86,19 +85,15 @@ class BoardMutation(graphene.ObjectType):
 
 
 class BoardQuery(graphene.ObjectType):
-    # 전체 회원 불러오기
-    # all_members = graphene.List(MemberType)
+    boards = graphene.List(
+        BoardType,
+        community=graphene.String(required=True),
+        page=graphene.Int(required=True),
+        page_size=graphene.Int(default_value=10)
+    )
 
-    # @classmethod
-    # def resolve_all_members(cls, root, info):
-    #     return Member.objects.all()
-    #
-    # # 특정 회원 정보 불러오기
-    # get_member = graphene.Field(UserType, username=graphene.String())
-    #
-    # @classmethod
-    # def resolve_get_member(cls, root, info, username):
-    #     return User.objects.filter(username=username).first()
-
-    pass
+    @classmethod
+    def resolve_boards(cls, root, info, community, page, page_size):
+        offset = (page - 1) * page_size
+        return Board.objects.filter(community=community).order_by("-id")[offset:offset + page_size]
 
