@@ -1,13 +1,14 @@
 import graphene
 
+from board.schema import BoardMutation, BoardQuery
 from member.schema import MemberQuery, MemberMutation
 
 
-class Query(MemberQuery, graphene.ObjectType):
+class Query(MemberQuery, BoardQuery, graphene.ObjectType):
     pass
 
 
-class Mutation(MemberMutation, graphene.ObjectType):
+class Mutation(MemberMutation, BoardMutation, graphene.ObjectType):
     # 토큰 재발급 (Refresh 토큰 필요시)
     # refresh_token = graphql_jwt.Refresh.Field()
     pass

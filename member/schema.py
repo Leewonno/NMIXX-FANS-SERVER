@@ -1,10 +1,12 @@
 import random
+import ssl
 from datetime import timedelta
 
+import certifi
 import graphene
 import graphql_jwt
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection, EmailMessage
 from django.db import transaction
 from django.utils import timezone
 from graphql_jwt import Verify
@@ -12,6 +14,7 @@ from graphql_jwt.exceptions import JSONWebTokenError
 from graphql_jwt.utils import get_payload, get_user_by_payload
 from jwt import ExpiredSignatureError
 
+from kpop.settings import get_secret
 from member.models import Member, Email
 from member.services.type import MemberType, UserType
 
@@ -85,15 +88,17 @@ class SendVerificationCode(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, email):
+        # 인증번호 생성
         code = str(random.randint(100000, 999999))  # 6자리 숫자
-        expire_time = timezone.now() + timedelta(minutes=10)
+        # 만료시간
+        expire_time = timezone.now() + timedelta(minutes=1)
 
+        # 가입된 이메일이 있는 지 확인
         user = User.objects.filter(email=email)
-
         if user.exists():
             return SendVerificationCode(ok=False, error="이미 가입된 이메일입니다.")
 
-        record, created = Email.objects.update_or_create(
+        Email.objects.update_or_create(
             email=email,
             defaults={
                 "code": code,
@@ -103,7 +108,7 @@ class SendVerificationCode(graphene.Mutation):
 
         send_mail(
             subject="이메일 인증번호",
-            message=f"인증번호는 {code} 입니다. 10분 안에 입력해주세요.",
+            message=f"인증번호는 {code} 입니다. 1분 안에 입력해주세요.",
             from_email="noreply@yourdomain.com",
             recipient_list=[email],
         )
