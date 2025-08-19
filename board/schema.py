@@ -2,7 +2,7 @@ import graphene
 
 from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE
 from board.models import Board, BoardComment
-from board.services.type import BoardType
+from board.type import BoardType
 from member.share import get_member_from_token
 
 

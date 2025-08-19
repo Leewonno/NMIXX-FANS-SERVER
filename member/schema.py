@@ -1,12 +1,10 @@
 import random
-import ssl
 from datetime import timedelta
 
-import certifi
 import graphene
 import graphql_jwt
 from django.contrib.auth.models import User
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from graphql_jwt import Verify
@@ -14,9 +12,8 @@ from graphql_jwt.exceptions import JSONWebTokenError
 from graphql_jwt.utils import get_payload, get_user_by_payload
 from jwt import ExpiredSignatureError
 
-from kpop.settings import get_secret
 from member.models import Member, Email
-from member.services.type import MemberType, UserType
+from member.type import MemberType, UserType
 
 
 class CreateUser(graphene.Mutation):

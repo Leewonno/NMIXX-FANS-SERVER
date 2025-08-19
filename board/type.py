@@ -3,8 +3,7 @@ from django.contrib.auth.models import User
 from graphene_django import DjangoObjectType
 
 from board.models import BoardComment, Board
-from member.models import Member
-from member.services.type import MemberType
+from member.type import MemberType
 
 
 class BoardCommentType(DjangoObjectType):
