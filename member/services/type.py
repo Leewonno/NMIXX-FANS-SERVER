@@ -13,7 +13,8 @@ class MemberType(DjangoObjectType):
             'id',
             'nick',
             'name',
-            'gender'
+            'gender',
+            'profile_img',
         )
 
 

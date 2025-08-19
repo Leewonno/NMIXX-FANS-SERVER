@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import json
+from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -58,6 +59,8 @@ INSTALLED_APPS = [
     'graphene_django',
     # 유저정보관리
     'member',
+
+    "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
 ]
 
 MIDDLEWARE = [
@@ -144,7 +147,21 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 GRAPHENE = {
-    'SCHEMA': 'config.schema.schema'  # 나중에 정의할 schema 경로
+    'SCHEMA': 'config.schema.schema',  # 나중에 정의할 schema 경로
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
+}
+
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Access Token 유효시간 (기본 5분)
+GRAPHQL_JWT = {
+    "JWT_EXPIRATION_DELTA": timedelta(minutes=30),  # Access Token 30분
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),  # Refresh Token 7일
 }
 
 INSTALLED_APPS += ['corsheaders']

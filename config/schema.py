@@ -8,6 +8,8 @@ class Query(MemberQuery, graphene.ObjectType):
 
 
 class Mutation(MemberMutation, graphene.ObjectType):
+    # 토큰 재발급 (Refresh 토큰 필요시)
+    # refresh_token = graphql_jwt.Refresh.Field()
     pass
 
 
