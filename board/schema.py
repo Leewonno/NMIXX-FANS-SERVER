@@ -90,20 +90,27 @@ class BoardQuery(graphene.ObjectType):
     boards = graphene.List(
         BoardType,
         community=graphene.String(required=True),
+        role=graphene.String(required=True),
         page=graphene.Int(required=True),
         page_size=graphene.Int(default_value=10)
     )
+
+    @classmethod
+    def resolve_boards(cls, root, info, community, role, page, page_size):
+        offset = (page - 1) * page_size
+        return Board.objects.filter(
+            ~Q(block=True),
+            community=community,
+            # 아티스트 게시판 role = 'C'
+            # 일반 유저(팬) 게시판 role = 'A'
+            member__role=role,
+        ).order_by("-id")[offset:offset + page_size]
 
     # 특정 게시글 불러오기 (댓글과 함께)
     board = graphene.Field(
         BoardType,
         board_id=graphene.Int(required=True),
     )
-
-    @classmethod
-    def resolve_boards(cls, root, info, community, page, page_size):
-        offset = (page - 1) * page_size
-        return Board.objects.filter(~Q(block=True), community=community ).order_by("-id")[offset:offset + page_size]
 
     @classmethod
     def resolve_board(cls, root, info, board_id):
