@@ -15,6 +15,7 @@ class MemberType(DjangoObjectType):
             'name',
             'gender',
             'profile_img',
+            'role',
         )
 
 
