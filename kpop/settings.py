@@ -43,7 +43,12 @@ SECRET_KEY = get_secret('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "192.168.200.137",
+    "58.140.226.129",
+]
 
 # Application definition
 
@@ -61,6 +66,7 @@ INSTALLED_APPS = [
     'board',
 
     "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
+    "sslserver",
 ]
 
 MIDDLEWARE = [
