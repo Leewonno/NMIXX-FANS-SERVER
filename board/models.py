@@ -57,3 +57,43 @@ class BoardComment(models.Model):
         null=True,
         blank=True
     )
+
+
+class BoardLike(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    # '게시글'
+    board = models.ForeignKey(
+        Board,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    # '계정'
+    member = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+
+class BoardLikeCount(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    # '일자'
+    date = models.DateField(verbose_name='일자', null=False, blank=False)
+
+    # '좋아요개수'
+    like = models.IntegerField(verbose_name='좋아요개수', default=0)
+
+    # '게시글'
+    board = models.ForeignKey(
+        Board,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
