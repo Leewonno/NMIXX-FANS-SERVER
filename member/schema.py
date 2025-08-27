@@ -27,11 +27,10 @@ class CreateUser(graphene.Mutation):
         username = graphene.String(required=True)
         password = graphene.String(required=True)
         email = graphene.String(required=True)
-        name = graphene.String(required=True)
-        gender = graphene.String(required=True)
+        nick = graphene.String(required=True)
 
     @classmethod
-    def mutate(cls, root, info, username, password, name, gender, email):
+    def mutate(cls, root, info, username, password, nick, email):
         with transaction.atomic():
             # 1. User 생성
             user = User.objects.create_user(
@@ -43,8 +42,7 @@ class CreateUser(graphene.Mutation):
             # 2. Member 생성 (User와 연결)
             member = Member.objects.create(
                 user=user,
-                name=name,
-                gender=gender
+                nick=nick,
             )
 
         return CreateUser(user=user, member=member, ok=True)

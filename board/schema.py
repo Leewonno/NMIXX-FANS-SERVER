@@ -177,19 +177,40 @@ class BoardQuery(graphene.ObjectType):
         community=graphene.String(required=True),
         role=graphene.String(required=True),
         page=graphene.Int(required=True),
-        page_size=graphene.Int(default_value=10)
+        page_size=graphene.Int(default_value=10),
+        token=graphene.String(required=False),
     )
 
     @classmethod
-    def resolve_boards(cls, root, info, community, role, page, page_size):
+    def resolve_boards(cls, root, info, community, role, page, page_size, token):
+        # 로그인한 유저 정보 가져오기
+        member = get_member_from_token(token, info.context)
+
         offset = (page - 1) * page_size
-        return Board.objects.filter(
+        qs = Board.objects.filter(
             ~Q(block=True),
             community=community,
             # 아티스트 게시판 role = 'C'
             # 일반 유저(팬) 게시판 role = 'A'
             member__role=role,
         ).order_by("-id")[offset:offset + page_size]
+
+        board_ids = [board.id for board in qs]
+
+        # 좋아요 체크
+        if member:
+            liked_ids = set(
+                BoardLike.objects.filter(
+                    member_id=member.id,
+                    board_id__in=board_ids
+                ).values_list("board_id", flat=True)
+            )
+            for board in qs:
+                board.is_liked = board.id in liked_ids
+        else:
+            for board in qs:
+                board.is_liked = False
+        return qs
 
     # 특정 게시글 불러오기 (댓글과 함께)
     board = graphene.Field(

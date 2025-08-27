@@ -2,7 +2,7 @@ import graphene
 from django.contrib.auth.models import User
 from graphene_django import DjangoObjectType
 
-from board.models import BoardComment, Board
+from board.models import BoardComment, Board, BoardLike
 from member.type import MemberType
 
 
@@ -24,6 +24,7 @@ class BoardType(DjangoObjectType):
     member = graphene.Field(MemberType)
     board_comment = graphene.Field(BoardCommentType)
     board_comments = graphene.List(BoardCommentType)
+    is_liked = graphene.Boolean()
 
     class Meta:
         model = Board
@@ -48,6 +49,9 @@ class BoardType(DjangoObjectType):
 
     def resolve_board_comments(self, info):
         return BoardComment.objects.filter(board=self)
+
+    def resolve_is_liked(self, info):
+        return getattr(self, "is_liked", False)
 
 
 class UserType(DjangoObjectType):

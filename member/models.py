@@ -4,11 +4,11 @@ from django.utils import timezone
 
 
 class Member(models.Model):
-    # '이름'
-    name = models.CharField(max_length=100, null=False)
-
     # '닉네임'
-    nick = models.CharField(max_length=100, null=False)
+    nick = models.CharField(max_length=100, null=False, unique=True)
+
+    # '이름'
+    name = models.CharField(max_length=100, null=True, blank=True)
 
     # '성별'
     gender = models.CharField(max_length=50, null=True, blank=True)
