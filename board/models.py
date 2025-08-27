@@ -16,6 +16,9 @@ class Board(models.Model):
     # '커뮤니티'
     community = models.CharField(max_length=50, verbose_name='커뮤니티', null=False, blank=False)
 
+    # '좋아요개수'
+    like = models.IntegerField(default=0, verbose_name='좋아요개수', null=False, blank=False)
+
     # '이미지'
     img_01 = models.ImageField(upload_to="img", null=True, blank=True)
     img_02 = models.ImageField(upload_to="img", null=True, blank=True)

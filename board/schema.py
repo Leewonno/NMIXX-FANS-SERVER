@@ -1,8 +1,11 @@
+from datetime import datetime
+
 import graphene
+from django.db import transaction
 from django.db.models import Q
 
 from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE
-from board.models import Board, BoardComment
+from board.models import Board, BoardComment, BoardLike, BoardLikeCount
 from board.type import BoardType
 from member.share import get_member_from_token
 
@@ -76,6 +79,88 @@ class CreateComment(graphene.Mutation):
         )
 
         return CreateComment(ok=True)
+
+
+# 게시글 좋아요
+class UpdateBoardLike(graphene.Mutation):
+    ok = graphene.Boolean()
+    status = graphene.Boolean()
+    error = graphene.String()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        board_id = graphene.Int(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, token, board_id, comment):
+        member = get_member_from_token(token, info.context)
+
+        if not member:
+            return UpdateBoardLike(ok=False, error=TOKEN_ERROR_MESSAGE)
+
+        board = Board.objects.get(id=board_id)
+
+        if not board:
+            return UpdateBoardLike(ok=False, error=BOARD_ERROR_MESSAGE)
+
+        with transaction.atomic():
+            # 좋아요 취소인지 생성(또는 업데이트) 인지 확인
+            board_like = BoardLike.objects.filter(
+                member=member,
+                board=board,
+            ).first()
+
+            # 새로 생성
+            if not board_like:
+                # =======================
+                # 좋아요 데이터 생성
+                BoardLike.objects.create(
+                    member=member,
+                    board=board,
+                )
+
+                # =======================
+                # 게시물 좋아요 개수 업데이트
+                board.like += 1
+                board.save()
+
+                # =======================
+                # 좋아요 카운트 테이블 생성 및 업데이트
+                board_like_count = BoardLikeCount.objects.filter(
+                    date=datetime.today(),
+                    board=board,
+                ).first()
+                if board_like_count:
+                    board_like_count.like += 1
+                    board_like_count.save()
+                else:
+                    BoardLikeCount.objects.create(
+                        date=datetime.today(),
+                        board=board,
+                        like=0
+                    )
+            # 좋아요 취소
+            else:
+                # =======================
+                # 좋아요 데이터 삭제
+                board_like.delete()
+
+                # =======================
+                # 게시물 좋아요 개수 업데이트
+                board.like -= 1
+                board.save()
+
+                # =======================
+                # 좋아요 카운트 테이블 업데이트
+                board_like_count = BoardLikeCount.objects.filter(
+                    date=datetime.today(),
+                    board=board,
+                ).first()
+                if board_like_count:
+                    board_like_count.like -= 1
+                    board_like_count.save()
+
+        return UpdateBoardLike(ok=True)
 
 
 class BoardMutation(graphene.ObjectType):
