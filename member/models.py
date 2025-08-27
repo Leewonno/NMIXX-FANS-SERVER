@@ -11,7 +11,7 @@ class Member(models.Model):
     nick = models.CharField(max_length=100, null=False)
 
     # '성별'
-    gender = models.CharField(max_length=50, null=False)
+    gender = models.CharField(max_length=50, null=True, blank=True)
 
     # '등급'
     # 'A' : 일반
