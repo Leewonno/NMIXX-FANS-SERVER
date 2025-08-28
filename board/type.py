@@ -34,6 +34,7 @@ class BoardType(DjangoObjectType):
             'title',
             'content',
             'created_at',
+            'like',
             'img_01',
             'img_02',
             'img_03',

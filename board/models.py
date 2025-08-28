@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from member.models import Member
@@ -65,6 +67,13 @@ class BoardComment(models.Model):
 class BoardLike(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    # '일자'
+    date = models.DateField(
+        verbose_name='일자',
+        null=False,
+        blank=False
+    )
 
     # '게시글'
     board = models.ForeignKey(

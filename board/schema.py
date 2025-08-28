@@ -86,13 +86,14 @@ class UpdateBoardLike(graphene.Mutation):
     ok = graphene.Boolean()
     status = graphene.Boolean()
     error = graphene.String()
+    like = graphene.Int()
 
     class Arguments:
         token = graphene.String(required=True)
         board_id = graphene.Int(required=True)
 
     @classmethod
-    def mutate(cls, root, info, token, board_id, comment):
+    def mutate(cls, root, info, token, board_id):
         member = get_member_from_token(token, info.context)
 
         if not member:
@@ -103,6 +104,9 @@ class UpdateBoardLike(graphene.Mutation):
         if not board:
             return UpdateBoardLike(ok=False, error=BOARD_ERROR_MESSAGE)
 
+        # 좋아요 + 1 -> status : True
+        # 좋아요 - 1 -> status : False
+
         with transaction.atomic():
             # 좋아요 취소인지 생성(또는 업데이트) 인지 확인
             board_like = BoardLike.objects.filter(
@@ -112,22 +116,26 @@ class UpdateBoardLike(graphene.Mutation):
 
             # 새로 생성
             if not board_like:
+                status = True
+                date = datetime.today()
                 # =======================
                 # 좋아요 데이터 생성
                 BoardLike.objects.create(
                     member=member,
                     board=board,
+                    date=date,
                 )
 
                 # =======================
                 # 게시물 좋아요 개수 업데이트
                 board.like += 1
+                like = board.like
                 board.save()
 
                 # =======================
                 # 좋아요 카운트 테이블 생성 및 업데이트
                 board_like_count = BoardLikeCount.objects.filter(
-                    date=datetime.today(),
+                    date=date,
                     board=board,
                 ).first()
                 if board_like_count:
@@ -135,32 +143,35 @@ class UpdateBoardLike(graphene.Mutation):
                     board_like_count.save()
                 else:
                     BoardLikeCount.objects.create(
-                        date=datetime.today(),
+                        date=date,
                         board=board,
-                        like=0
+                        like=1
                     )
             # 좋아요 취소
             else:
+                status = False
                 # =======================
                 # 좋아요 데이터 삭제
+                date = board_like.date
                 board_like.delete()
 
                 # =======================
                 # 게시물 좋아요 개수 업데이트
                 board.like -= 1
+                like = board.like
                 board.save()
 
                 # =======================
                 # 좋아요 카운트 테이블 업데이트
                 board_like_count = BoardLikeCount.objects.filter(
-                    date=datetime.today(),
+                    date=date,
                     board=board,
-                ).first()
+                ).order_by('-id').first()
                 if board_like_count:
                     board_like_count.like -= 1
                     board_like_count.save()
 
-        return UpdateBoardLike(ok=True)
+        return UpdateBoardLike(ok=True, status=status, like=like)
 
 
 class BoardMutation(graphene.ObjectType):
@@ -168,6 +179,8 @@ class BoardMutation(graphene.ObjectType):
     create_board = CreateBoard.Field()
     # 댓글 작성
     create_comment = CreateComment.Field()
+    # 게시글 좋아요
+    update_board_like = UpdateBoardLike.Field()
 
 
 class BoardQuery(graphene.ObjectType):
@@ -205,22 +218,39 @@ class BoardQuery(graphene.ObjectType):
                     board_id__in=board_ids
                 ).values_list("board_id", flat=True)
             )
-            for board in qs:
-                board.is_liked = board.id in liked_ids
+            for item in qs:
+                item.is_liked = item.id in liked_ids
         else:
-            for board in qs:
-                board.is_liked = False
+            for item in qs:
+                item.is_liked = False
         return qs
 
     # 특정 게시글 불러오기 (댓글과 함께)
     board = graphene.Field(
         BoardType,
         board_id=graphene.Int(required=True),
+        token=graphene.String(required=True),
     )
 
     @classmethod
-    def resolve_board(cls, root, info, board_id):
+    def resolve_board(cls, root, info, board_id, token):
+        # 로그인한 유저 정보 가져오기
+        member = get_member_from_token(token, info.context)
+        item = Board.objects.get(block=False, id=board_id)
+
+        # 좋아요 체크
+        if member:
+            liked_ids = set(
+                BoardLike.objects.filter(
+                    member_id=member.id,
+                    board_id=board_id
+                ).values_list("board_id", flat=True)
+            )
+            item.is_liked = item.id in liked_ids
+        else:
+            item.is_liked = False
+
         try:
-            return Board.objects.get(block=False, id=board_id)
+            return item
         except Board.DoesNotExist:
             return None
