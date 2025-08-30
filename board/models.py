@@ -16,12 +16,15 @@ class Board(models.Model):
     # '커뮤니티'
     community = models.CharField(max_length=50, verbose_name='커뮤니티', null=False, blank=False)
 
+    # '좋아요개수'
+    like = models.IntegerField(default=0, verbose_name='좋아요개수', null=False, blank=False)
+
     # '이미지'
-    img_01 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_02 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_03 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_04 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_05 = models.ImageField(upload_to="img", null=True, blank=True)
+    img_01 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_02 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_03 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_04 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_05 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
 
     # '차단'
     block = models.BooleanField(default=False, null=False)
@@ -53,6 +56,53 @@ class BoardComment(models.Model):
     # '계정'
     member = models.ForeignKey(
         Member,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+
+class BoardLike(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    # '일자'
+    date = models.DateField(
+        verbose_name='일자',
+        null=False,
+        blank=False
+    )
+
+    # '게시글'
+    board = models.ForeignKey(
+        Board,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    # '계정'
+    member = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+
+class BoardLikeCount(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    # '일자'
+    date = models.DateField(verbose_name='일자', null=False, blank=False)
+
+    # '좋아요개수'
+    like = models.IntegerField(verbose_name='좋아요개수', default=0)
+
+    # '게시글'
+    board = models.ForeignKey(
+        Board,
         on_delete=models.CASCADE,
         null=True,
         blank=True

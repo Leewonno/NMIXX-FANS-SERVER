@@ -4,14 +4,14 @@ from django.utils import timezone
 
 
 class Member(models.Model):
-    # '이름'
-    name = models.CharField(max_length=100, null=False)
-
     # '닉네임'
-    nick = models.CharField(max_length=100, null=False)
+    nick = models.CharField(max_length=100, null=False, unique=True)
+
+    # '이름'
+    name = models.CharField(max_length=100, null=True, blank=True)
 
     # '성별'
-    gender = models.CharField(max_length=50, null=False)
+    gender = models.CharField(max_length=50, null=True, blank=True)
 
     # '등급'
     # 'A' : 일반
@@ -25,7 +25,7 @@ class Member(models.Model):
     role = models.CharField(max_length=50, null=False, default='A')
 
     # '프로필 사진'
-    profile_img = models.ImageField(upload_to="profile", null=True, blank=True)
+    profile_img = models.ImageField(upload_to="profile", null=True, blank=True, max_length=500)
 
     # '계정'
     user = models.OneToOneField(
