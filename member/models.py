@@ -25,7 +25,7 @@ class Member(models.Model):
     role = models.CharField(max_length=50, null=False, default='A')
 
     # '프로필 사진'
-    profile_img = models.ImageField(upload_to="profile", null=True, blank=True)
+    profile_img = models.ImageField(upload_to="profile", null=True, blank=True, max_length=500)
 
     # '계정'
     user = models.OneToOneField(
