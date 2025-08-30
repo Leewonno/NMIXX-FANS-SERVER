@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import graphene
 from django.db import transaction
@@ -198,7 +198,6 @@ class BoardQuery(graphene.ObjectType):
     def resolve_boards(cls, root, info, community, role, page, page_size, token):
         # 로그인한 유저 정보 가져오기
         member = get_member_from_token(token, info.context)
-
         offset = (page - 1) * page_size
         qs = Board.objects.filter(
             ~Q(block=True),
@@ -254,3 +253,30 @@ class BoardQuery(graphene.ObjectType):
             return item
         except Board.DoesNotExist:
             return None
+
+    # 전날 인기글
+    popular_boards = graphene.List(
+        BoardType,
+        community=graphene.String(required=True),
+    )
+
+    @classmethod
+    def resolve_popular_boards(cls, root, info, community):
+        yesterday = datetime.today() - timedelta(days=1)
+        # 전날 인기글 10개 불러옴
+        qs_like_count = BoardLikeCount.objects.filter(
+            date=yesterday,
+        ).order_by('-like')[:10]
+
+        board_ids = [i.board_id for i in qs_like_count]
+
+        # 아티스트 게시판은 가져오지 않음
+        qs = Board.objects.filter(
+            ~Q(block=True),
+            id__in=board_ids,
+            community=community,
+            # 일반 유저(팬) 게시판 role = 'A'
+            member__role='A',
+        ).order_by("-id")[:10]
+
+        return list(qs)

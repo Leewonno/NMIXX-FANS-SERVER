@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db import models
 
 from member.models import Member
@@ -22,11 +20,11 @@ class Board(models.Model):
     like = models.IntegerField(default=0, verbose_name='좋아요개수', null=False, blank=False)
 
     # '이미지'
-    img_01 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_02 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_03 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_04 = models.ImageField(upload_to="img", null=True, blank=True)
-    img_05 = models.ImageField(upload_to="img", null=True, blank=True)
+    img_01 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_02 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_03 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_04 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
+    img_05 = models.ImageField(upload_to="img", null=True, blank=True, max_length=500)
 
     # '차단'
     block = models.BooleanField(default=False, null=False)

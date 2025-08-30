@@ -20,5 +20,5 @@ class GeneratePresignedURL(graphene.Mutation):
         return generate_presigned_url(filename, content_type)
 
 
-class Mutation(graphene.ObjectType):
+class UploadMutation(graphene.ObjectType):
     generate_presigned_url = GeneratePresignedURL.Field()

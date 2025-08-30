@@ -23,7 +23,7 @@ def generate_presigned_url(filename: str, content_type: str, expires_in=3600):
         Params={
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
             "Key": key,
-            "ContentType": content_type,
+            "ContentType": content_type
         },
         ExpiresIn=expires_in,
     )
