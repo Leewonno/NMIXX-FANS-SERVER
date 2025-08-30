@@ -27,7 +27,7 @@ JYP 엔터테인먼트의 자회사 Blue Garage에서 개발·운영하는 **FAN
 *   `shared/`: 앱 전체에서 사용되는 공통 컴포넌트, 유틸리티 함수, API 서비스 및 타입 정의를 포함합니다.
 *   `widgets/`: 특정 페이지나 기능에 속하지만, 재사용될 수 있는 더 큰 UI 컴포넌트들을 모아둔 곳입니다.
 
-## 5. 화면 구성 및 기능 시연
+## 5. 화면 구성
 ### 5-1. 메인스크린/탭구성
 <img width="1920" height="1080" alt="nmixxfans_home" src="https://github.com/user-attachments/assets/d34a98f8-d158-4ac3-a23b-f9e5e29b0173" />
 
