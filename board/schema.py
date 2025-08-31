@@ -4,7 +4,7 @@ import graphene
 from django.db import transaction
 from django.db.models import Q
 
-from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE
+from board.constant import TOKEN_ERROR_MESSAGE, BOARD_ERROR_MESSAGE, NOT_MASTER_ERROR_MESSAGE
 from board.models import Board, BoardComment, BoardLike, BoardLikeCount
 from board.type import BoardType
 from member.share import get_member_from_token
@@ -48,6 +48,88 @@ class CreateBoard(graphene.Mutation):
         )
 
         return CreateBoard(ok=True)
+
+
+# 게시글 수정
+class UpdateBoard(graphene.Mutation):
+    # 반환할 필드
+    ok = graphene.Boolean()
+    error = graphene.String()
+
+    class Arguments:
+        # 클라이언트가 넘겨줄 인자
+        token = graphene.String(required=True)
+        # Board id
+        board_id = graphene.Int(required=True)
+        title = graphene.String(required=True)
+        content = graphene.String(required=True)
+        img_01 = graphene.String()
+        img_02 = graphene.String()
+        img_03 = graphene.String()
+        img_04 = graphene.String()
+        img_05 = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, board_id, token, title, content, img_01=None, img_02=None, img_03=None, img_04=None, img_05=None):
+        member = get_member_from_token(token, info.context)
+
+        if not member:
+            return UpdateBoard(ok=False, error=TOKEN_ERROR_MESSAGE)
+
+        # 게시물 정보 불러오기
+        qs = Board.objects.get(id=board_id)
+
+        # 삭제된 경우
+        if not qs:
+            return UpdateBoard(ok=False, error=BOARD_ERROR_MESSAGE)
+
+        # 작성자가 맞는 지 확인
+        if member.id != qs.id:
+            return UpdateBoard(ok=False, error=NOT_MASTER_ERROR_MESSAGE)
+
+        qs.title = title
+        qs.content = content
+        qs.img_01 = img_01
+        qs.img_02 = img_02
+        qs.img_03 = img_03
+        qs.img_04 = img_04
+        qs.img_05 = img_05
+        qs.save()
+
+        return UpdateBoard(ok=True)
+
+
+# 게시글 삭제
+class DeleteBoard(graphene.Mutation):
+    ok = graphene.Boolean()
+    error = graphene.String()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        board_id = graphene.Int(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, token, board_id, comment):
+        member = get_member_from_token(token, info.context)
+
+        if not member:
+            return DeleteBoard(ok=False, error=TOKEN_ERROR_MESSAGE)
+
+        qs = Board.objects.get(id=board_id)
+
+        # 이미 존재하지 않는 문서일 경우
+        if not qs:
+            return DeleteBoard(ok=False, error=BOARD_ERROR_MESSAGE)
+
+        # 관리자 권한이 있으면 삭제 가능 / 관리자가 아닌 경우는 본인만 삭제 가능
+        if member.role == 'B':
+            qs.delete()
+        else:
+            # 본인인 맞는 지 확인
+            if qs.member.id != member.id:
+                return DeleteBoard(ok=False, error=NOT_MASTER_ERROR_MESSAGE)
+            qs.delete()
+        return DeleteBoard(ok=True)
 
 
 # 댓글 작성
@@ -177,10 +259,17 @@ class UpdateBoardLike(graphene.Mutation):
 class BoardMutation(graphene.ObjectType):
     # 게시글 작성
     create_board = CreateBoard.Field()
+    # 게시글 수정
+    update_board = UpdateBoard.Field()
+    # 게시글 삭제
+    delete_board = DeleteBoard.Field()
     # 댓글 작성
     create_comment = CreateComment.Field()
     # 게시글 좋아요
     update_board_like = UpdateBoardLike.Field()
+    # 댓글 수정
+    # 댓글 삭제
+    # 댓글 좋아요
 
 
 class BoardQuery(graphene.ObjectType):
