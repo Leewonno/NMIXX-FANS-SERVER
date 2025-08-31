@@ -2,7 +2,7 @@
 
 ## 1. 소개
 
-JYP 엔터테인먼트의 자회사 Blue Garage에서 개발·운영하는 **FANS** 서비스를 기반으로 제작한 **NMIXX FANS** 서비스입니다. **React Native**로 앱을 개발했으며, 백엔드 서버는 **Django**와 **GraphQL**을 이용하여 구축했습니다.
+JYP 엔터테인먼트의 자회사 Blue Garage에서 개발·운영하는 **FANS** 서비스를 바탕으로 제작한 **NMIXX FANS** 서비스입니다. **React Native**로 앱을 개발했으며, 백엔드 서버는 **Django**와 **GraphQL**을 이용하여 구축했습니다.
 
 ## 2. 개발기간
 2025년 8월 10일 ~ 2025년 8월 30일
