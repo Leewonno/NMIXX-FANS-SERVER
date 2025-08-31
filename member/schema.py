@@ -156,9 +156,6 @@ class MemberQuery(graphene.ObjectType):
     # 전체 회원 불러오기
     all_members = graphene.List(MemberType)
 
-    # 특정 문자열 반환
-    hello = graphene.String(default_value="안녕하세요. JYP엔터테인먼트 백엔드 개발자로 지원하게 된 이원노입니다. 잘 부탁드립니다.")
-
     @classmethod
     def resolve_all_members(cls, root, info):
         return Member.objects.all()
