@@ -19,6 +19,7 @@ JYP 엔터테인먼트의 자회사 Blue Garage에서 개발·운영하는 **FAN
 *   **TypeScript**: JavaScript 정적 타입 체크
 *   **Styled-components**: React Native 컴포넌트 스타일 적용
 *   **Redux Toolkit**: 전역 상태 관리
+*   **Django**: Python 웹 프레임워크
 *   **GraphQL**: API 통신을 위한 쿼리 언어
 
 ## 5. 폴더 및 파일 구조
