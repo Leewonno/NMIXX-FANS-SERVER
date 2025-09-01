@@ -5,11 +5,12 @@ from django.db.models import Q
 
 from board.models import Board, BoardLike, BoardLikeCount
 from board.service.board import UpdateBoardLike, CreateBoard, UpdateBoard, DeleteBoard
-from board.service.comment import CreateComment
+from board.service.comment import CreateComment, UpdateComment, DeleteComment
 from board.type import BoardType
 from member.share import get_member_from_token
 
 
+# POST
 class BoardMutation(graphene.ObjectType):
     # 게시글 작성
     create_board = CreateBoard.Field()
@@ -22,10 +23,13 @@ class BoardMutation(graphene.ObjectType):
     # 게시글 좋아요
     update_board_like = UpdateBoardLike.Field()
     # 댓글 수정
+    update_comment = UpdateComment.Field()
     # 댓글 삭제
+    delete_comment = DeleteComment.Field()
     # 댓글 좋아요
 
 
+# GET
 class BoardQuery(graphene.ObjectType):
     # 특정 게시판(커뮤니티)에 게시글 불러오기
     boards = graphene.List(
