@@ -54,15 +54,3 @@ class BoardType(DjangoObjectType):
     def resolve_is_liked(self, info):
         return getattr(self, "is_liked", False)
 
-
-class UserType(DjangoObjectType):
-    member = graphene.Field(MemberType)
-
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email')
-
-    def resolve_member(self, info):
-        # user 인스턴스(self)에 연결된 Member를 반환
-        # return Member.objects.filter(user_id=self.id).first()
-        return self.member
